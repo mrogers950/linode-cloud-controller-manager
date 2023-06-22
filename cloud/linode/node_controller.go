@@ -1,7 +1,6 @@
 package linode
 
 import (
-	"context"
 	"time"
 
 	"github.com/appscode/go/wait"
@@ -15,22 +14,22 @@ import (
 const nodeControllerRetryInterval = time.Minute * 1
 
 type nodeController struct {
-	nodePoolLabels *nodePoolLabels
-	nodePoolTaints *nodePoolTaints
-	informer       v1informers.NodeInformer
+	//nodePoolLabels *nodePoolLabels
+	//nodePoolTaints *nodePoolTaints
+	informer v1informers.NodeInformer
 
 	queue workqueue.DelayingInterface
 }
 
 func newNodeController(
 	// We might not pass a nodePoolLabels, nodePoolTaints into the controller, but rather fetch them in the controller at an interval.
-	nodePoolLabels *nplabels, nodePoolTaints *nptaints,
+	// nodePoolLabels *nplabels, nodePoolTaints *nptaints,
 	informer v1informers.NodeInformer) *nodeController {
 	return &nodeController{
-		nodePoolLabels: nplabels,
-		nodePoolTaints: nptaints,
-		informer:       informer,
-		queue:          workqueue.NewDelayingQueue(),
+		//nodePoolLabels: nplabels,
+		//nodePoolTaints: nptaints,
+		informer: informer,
+		queue:    workqueue.NewDelayingQueue(),
 	}
 }
 
@@ -51,7 +50,6 @@ func (n *nodeController) Run(stopCh <-chan struct{}) {
 			}
 
 			// * needs more checks on node objects, comparison of oldNode with newNode.
-
 			klog.Infof("NodeController will handle update of node %s", newNode.Name)
 			n.queue.Add(newObj)
 		},
@@ -62,7 +60,6 @@ func (n *nodeController) Run(stopCh <-chan struct{}) {
 			}
 
 			// * needs more checks on node
-
 			klog.Infof("NodeController will handle addition of node %s", node.Name)
 			n.queue.Add(obj)
 		},
@@ -102,11 +99,12 @@ func (n *nodeController) processNextNode() bool {
 
 func (n *nodeController) handleNodeUpdate(node *v1.Node) error {
 	klog.Infof("NodeController handling label and taint update for node %s", node.Name)
-
-	// Assuming our nodePoolLabel/nodePoolTaint cache is up to date, run our functions that do the update.
-	err := n.nodePoolLabels.EnsureNodeLabelUpdate(context.Background(), node.ClusterName, node)
-	// * do error stuff
-	err = n.nodePoolTaints.EnsureNodeTaintUpdate(context.Background(), node.ClusterName, node)
-	// * do error stuff
-	return err
+	// read node label "lke.linode.com/pool-id": "555"
+	// * we don't know the cluster name from the node through the label, but we do through the name of the node (in all cases?)
+	//
+	// get pool via pool-id
+	//
+	// check for labels, and taints, and update the node
+	//
+	return nil
 }
